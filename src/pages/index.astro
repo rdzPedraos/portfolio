@@ -1,26 +1,36 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Model from '../components/Model.astro';
+import Logo from '../components/Logo.astro';
 ---
 
 <Layout>
-    <div class="absolute top-4 left-4">
-        <p class="text-8xl font-bold text-white">building portfolio...</p>
-        <a
-            class="block text-white hover:text-purple-400"
-            href="https://github.com/rdzPedraos"
-            target="_blank"
-        >
-            Go to my github
-        </a>
+    <p class="absolute top-[50vh] right-8 text-7xl font-bold">
+        project under<br />
+        construction 👷🏻‍♂️
+    </p>
 
-        <a
-            class="block text-white hover:text-blue-400"
-            href="https://www.linkedin.com/in/rdzpedraos/"
-            target="_blank"
-        >
-            Go to my linkedin
-        </a>
+    <div class="absolute top-12 left-4 flex gap-4">
+        <Logo className="mb-10" />
+
+        <div>
+            <a
+                class="block text-2xl hover:text-purple-400"
+                href="https://github.com/rdzPedraos"
+                target="_blank"
+            >
+                Go to my github
+            </a>
+
+            <a
+                class="block text-2xl hover:text-blue-400"
+                href="https://www.linkedin.com/in/rdzpedraos/"
+                target="_blank"
+            >
+                Go to my linkedin
+            </a>
+        </div>
     </div>
+
     <Model />
 </Layout>

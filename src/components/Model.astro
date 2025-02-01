@@ -1,103 +1,72 @@
----
-
----
-
-<div class="h-screen w-screen" id="container"></div>
+<canvas class="h-screen w-screen" id="3d-canvas"></canvas>
 
 <script>
     import * as THREE from 'three';
     import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    import { createControl } from '../utils/control';
 
-    export default class Sketch {
-        constructor(options) {
-            this.container = options.domElement;
-            this.width = this.container.offsetWidth;
-            this.height = this.container.offsetHeight;
+    const canvas = document.getElementById('3d-canvas');
+    const gui = new createControl();
 
-            this.camera = new THREE.PerspectiveCamera(
-                70,
-                this.width / this.height,
-                0.01,
-                10,
-            );
-            this.camera.position.z = 1;
+    // 1. Scene
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#F0F0F0');
 
-            this.scene = new THREE.Scene();
+    // 2. Camera
+    const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000,
+    );
+    camera.position.set(0, 0, 10);
+    gui.addControls('camera', camera);
 
-            this.renderer = new THREE.WebGLRenderer({ antialias: true });
-            // this.renderer.setPixelRatio(window.devicePixelRatio)
-            this.renderer.setPixelRatio(2);
+    // 3. Light
+    const light = new THREE.SpotLight('#efefef', 100);
+    light.position.set(0, 4, 4);
+    scene.add(light);
 
-            this.container.appendChild(this.renderer.domElement);
-            this.controls = new OrbitControls(
-                this.camera,
-                this.renderer.domElement,
-            );
-
-            this.time = 0;
-            this.resize();
-            this.addObjects();
-            //this.loadGLTFModel();
-            this.render();
-
-            this.setupResize();
-        }
-
-        resize() {
-            this.width = this.container.offsetWidth;
-            this.height = this.container.offsetHeight;
-            this.renderer.setSize(this.width, this.height);
-            this.camera.aspect = this.width / this.height;
-            this.camera.updateProjectionMatrix();
-        }
-
-        setupResize() {
-            window.addEventListener('resize', this.resize.bind(this));
-        }
-
-        addObjects() {
-            this.geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-            this.material = new THREE.MeshNormalMaterial();
-            this.mesh = new THREE.Mesh(this.geometry, this.material);
-            this.scene.add(this.mesh);
-        }
-
-        loadGLTFModel() {
-            const loader = new GLTFLoader(); // Instanciamos el cargador
-            console.log('creacion...');
-
-            // Asegúrate de que la ruta sea correcta. En este caso, se asume que 'model.glb' está en 'public'
-            loader.load(
-                '/model.glb',
-                (gltf) => {
-                    console.log('Modelo cargado correctamente');
-                    // Agregar el modelo GLTF a la escena
-                    this.scene.add(gltf.scene);
-
-                    // Ajustar la escala o posición si es necesario
-                    gltf.scene.scale.set(0.5, 0.5, 0.5); // Ejemplo de escala
-                    gltf.scene.position.set(0, 0, 0); // Ajusta la posición si es necesario
-                },
-                undefined,
-                (error) => {
-                    console.error('Error cargando el modelo GLTF:', error);
-                },
-            );
-        }
-
-        render() {
-            this.mesh.rotation.x += 0.005;
-            this.mesh.rotation.y += 0.005;
-            this.renderer.render(this.scene, this.camera);
-
-            requestAnimationFrame(this.render.bind(this));
-        }
-    }
-
-    new Sketch({
-        domElement: document.getElementById('container'),
+    // 4. Object
+    const loader = new GLTFLoader();
+    let model: any;
+    loader.load('/model.glb', (gltf) => {
+        model = gltf.scene;
+        model.position.set(0, -7, 0);
+        model.rotation.set(0, -0.4, 0);
+        model.scale.setScalar(0.3);
+        gui.addControls('model', model);
+        scene.add(model);
     });
 
-    // const width = window.innerWidth, height = window.innerHeight;
+    // 5. Rendered
+    const renderer = new THREE.WebGLRenderer({ canvas });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio); // For screen with high pixel density
+    renderer.render(scene, camera);
+
+    // 6. Add OrbitControls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.01;
+    controls.enableZoom = true;
+    controls.enablePan = true;
+
+    // 8. Animation
+    function animate() {
+        requestAnimationFrame(animate);
+
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    //9. Handle window resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
 </script>
